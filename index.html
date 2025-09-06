@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Промты для ChatGPT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Убираем синий квадрат при нажатии на кнопки и карточки */
+        button, .prompt-card {
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        h1 {
+            color: #6e8efb;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1.1rem;
+        }
+
+        .prompts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .prompt-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #f0f0f0;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .prompt-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            border-color: #a777e3;
+        }
+
+        /* Эффект нажатия на карточку */
+        .prompt-card:active {
+            transform: scale(0.98);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .prompt-card h3 {
+            color: #6e8efb;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .prompt-card p {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .prompt-card .category {
+            display: inline-block;
+            background: #e6eeff;
+            color: #6e8efb;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 15px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+            transform: translateY(100px);
+            transition: transform 0.4s ease;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.8rem;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.2s;
+            background: none;
+            border: none;
+        }
+
+        .close-btn:hover {
+            color: #ff5757;
+        }
+
+        .prompt-text {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+            line-height: 1.5;
+            border-left: 4px solid #6e8efb;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 auto;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(110, 142, 251, 0.4);
+        }
+
+        /* Эффект нажатия на кнопку */
+        .copy-btn:active {
+            transform: scale(0.95);
+            filter: brightness(0.9);
+        }
+
+        .copy-btn.copied {
+            background: linear-gradient(135deg, #4cd964, #34e559);
+        }
+
+        .instructions {
+            background: #fff8e6;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .instructions h3 {
+            color: #e6b400;
+            margin-bottom: 10px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .prompts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Анимация появления карточек */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .prompt-card {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .prompt-card:nth-child(1) { animation-delay: 0.1s; }
+        .prompt-card:nth-child(2) { animation-delay: 0.2s; }
+        .prompt-card:nth-child(3) { animation-delay: 0.3s; }
+        .prompt-card:nth-child(4) { animation-delay: 0.4s; }
+        .prompt-card:nth-child(5) { animation-delay: 0.5s; }
+        .prompt-card:nth-child(6) { animation-delay: 0.6s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Промты для ChatGPT</h1>
+            <p class="subtitle">Коллекция полезных запросов для эффективного обучения</p>
+        </header>
+
+        <div class="prompts-grid">
+            <div class="prompt-card" onclick="openPrompt(0)">
+                <h3>Универсальный учитель</h3>
+                <p>Объясняет сложные темы простыми словами, как для 7-летнего ребенка</p>
+                <span class="category">Обучение</span>
+            </div>
+
+            <div class="prompt-card" onclick="openPrompt(1)">
+                <h3>Краткий режим</h3>
+                <p>Только факты, формулы и даты без лишних объяснений</p>
+                <span class="category">Справка</span>
+            </div>
+
+            <div class="prompt-card" onclick="openPrompt(2)">
+                <h3>Решатель задач</h3>
+                <p>Помогает решать задачи, уточняя все неизвестные переменные</p>
+                <span class="category">Математика/Физика</span>
+            </div>
+
+            <div class="prompt-card" onclick="openPrompt(3)">
+                <h3>Система тестов</h3>
+                <p>Создает тестовые задания для проверки знаний</p>
+                <span class="category">Проверка знаний</span>
+            </div>
+
+            <div class="prompt-card" onclick="openPrompt(4)">
+                <h3>Конспектер</h3>
+                <p>Упрощает сложные тексты, выделяя главные идеи</p>
+                <span class="category">Работа с текстом</span>
+            </div>
+
+            <div class="prompt-card" onclick="openPrompt(5)">
+                <h3>Креативный помощник</h3>
+                <p>Помогает с идеями для проектов и презентаций</p>
+                <span class="category">Творчество</span>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>Как использовать</h3>
+            <p>1. Нажмите на карточку с нужным промтом</p>
+            <p>2. Нажмите кнопку "Скопировать промт"</p>
+            <p>3. Вставьте скопированный текст в ChatGPT и начните диалог</p>
+            <p>4. Для каждого предмета рекомендуется начинать новый диалог</p>
+        </div>
+
+        <footer>
+            <p>Создано для эффективной работы с ChatGPT © 2023</p>
+        </footer>
+    </div>
+
+    <div class="modal" id="promptModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <h2 id="modalTitle">Название промта</h2>
+            <p id="modalDescription">Описание промта</p>
+            <div class="prompt-text" id="modalPromptText">Текст промта...</div>
+            <button class="copy-btn" id="copyButton" onclick="copyPrompt()">
+                <span>Скопировать промт</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Массив с промтами
+        const prompts = [
+            {
+                title: "Универсальный учитель",
+                description: "Объясняет сложные темы простыми словами, как для 7-летнего ребенка",
+                text: `Ты — терпеливый и добрый учитель, который объясняет сложные темы простыми словами. Твоя задача — объяснять мне любые школьные предметы (математику, историю, физику и т.д.) так, как если бы мне было 7 лет. Используй очень простой язык, приводи много примеров из жизни, рисуй словесные картинки и не используй сложные термины без их объяснения. Если речь идет о вычислениях, объясняй каждый шаг, каждое действие, например, "вот эту цифру мы переносим сюда, потому что...". Всегда уточняй, понял ли я тему, и предлагай объяснить ещё раз, если нужно. Начни с приветствия и спроси, какую тему я хочу изучить сегодня.`
+            },
+            {
+                title: "Краткий режим",
+                description: "Только факты, формулы и даты без лишних объяснений",
+                text: `Ты — генератор кратких справок. Отвечай максимально сжато, без лишних слов, используя только ключевые факты, формулы, даты или определения. Не давай объяснений и примеров, если я не попрошу об этом отдельно. Структурируй ответ в виде списков или таблиц, если это уместно.
+
+Спроси, по какому предмету и какой конкретно теме мне нужна информация.`
+            },
+            {
+                title: "Решатель задач",
+                description: "Помогает решать задачи, уточняя все неизвестные переменные",
+                text: `Ты — решатель задач по физике и математике. Твоя задача — НЕ начинать решать сразу. Сначала ты ДОЛЖЕН уточнить все неизвестные переменные и условия. Спроси, что дано в задаче, и что нужно найти. Только после того, как я предоставлю все данные, предоставь краткое решение с четким ответом. Решение должно быть по шагам, но без лишних объяснений, только математика/формулы. Всегда начинай диалог с вопроса: "Какую задачу нужно решить? Опиши условие."`
+            },
+            {
+                title: "Система тестов",
+                description: "Создает тестовые задания для проверки знаний",
+                text: `Ты — генератор тестовых заданий. Создавай мне тесты по выбранной теме (например, 5 вопросов с вариантами ответов). После того, как я отвечу на все вопросы, предоставь правильные ответы и объясни их кратко. Начни с того, что спроси, по какому предмету и теме мне нужен тест.`
+            },
+            {
+                title: "Конспектер",
+                description: "Упрощает сложные тексты, выделяя главные идеи",
+                text: `Ты — мастер по созданию конспектов. Я буду присылать тебе сложные тексты. Твоя задача — выделить главные идеи, убрать "воду" и переписать текст кратко и понятно, используя маркированные списки и простые слова. Начни с вопроса: "Какой текст нужно упростить?" и напиши: "Жду твой текст".`
+            },
+            {
+                title: "Креативный помощник",
+                description: "Помогает с идеями для проектов и презентаций",
+                text: `Ты — креативный помощник для школьных проектов. Помоги мне придумать интересную идею, составить план выступления или презентации, написать яркое введение для доклада. Задавай наводящие вопросы, чтобы понять тему и мои цели. Начни с вопроса: "Над каким проектом ты работаешь?"`
+            }
+        ];
+
+        // Открытие модального окна с промтом
+        function openPrompt(index) {
+            const prompt = prompts[index];
+            document.getElementById('modalTitle').textContent = prompt.title;
+            document.getElementById('modalDescription').textContent = prompt.description;
+            document.getElementById('modalPromptText').textContent = prompt.text;
+            
+            const modal = document.getElementById('promptModal');
+            modal.classList.add('active');
+            
+            // Сброс кнопки копирования
+            const copyButton = document.getElementById('copyButton');
+            copyButton.classList.remove('copied');
+            copyButton.innerHTML = '<span>Скопировать промт</span>';
+        }
+
+        // Закрытие модального окна
+        function closeModal() {
+            const modal = document.getElementById('promptModal');
+            modal.classList.remove('active');
+        }
+
+        // Копирование промта в буфер обмена
+        function copyPrompt() {
+            const promptText = document.getElementById('modalPromptText').textContent;
+            navigator.clipboard.writeText(promptText).then(() => {
+                const copyButton = document.getElementById('copyButton');
+                copyButton.classList.add('copied');
+                copyButton.innerHTML = '<span>Скопировано!</span>';
+                
+                // Возвращаем исходный текст через 2 секунды
+                setTimeout(() => {
+                    copyButton.classList.remove('copied');
+                    copyButton.innerHTML = '<span>Скопировать промт</span>';
+                }, 2000);
+            });
+        }
+
+        // Закрытие модального окна при клике вне его области
+        window.addEventListener('click', (event) => {
+            const modal = document.getElementById('promptModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
